@@ -425,20 +425,27 @@ These steps outline the process for using `ddrindex` tools to prepare an Elastic
 
 #. Create the DDR index.  This step initializes the index and uploads mappings and facet information. Note that the ESHOST_IP and index name, `ddrpublic-production` in this case, must match the `docstore_host` and `docstore_index` vars in both the `[local]` and `[public]` sections of `/etc/ddr/ddrlocal.cfg` or the overrides in `/etc/ddr/ddrlocal-local.cfg`::
       
-    $ ddrindex create --hosts http://ESHOST_IP:9200 --index ddrpublic-production
-
+    $ ddrindex create --hosts --index ddrpublic-production
+    
+    $ ddrindex conf
 You can check if the DDR index already exists with the following command::
 
-    $ ddrindex status --hosts http://ESHOST_IP:9200 --index ddrpublic-production
+    $ ddrindex status --hosts --index ddrpublic-production
 
 You can also delete the existing index, if you need to completely re-initialize the ES cluster for `ddr-public`::
   
-    $ ddrindex destroy --hosts http://ESHOST_IP:9200 --index ddrpublic-production
+    $ ddrindex destroy --index documents --confirm
     
-#. Set up repository and organization documents. Before indexing any collection content, the ES index must contain 'repository' and 'organization' metadata. The 'repository' data is basic information about the `ddr-public` instance, and the 'organization' json documents describe each individual DDR partner. Partner content cannot be indexed until the the corresponding 'organization' json document is indexed. The 'organization' files can be found in the organizations' inventory repositories; the master 'repository' json is in the 'ddr' repo::
+#. Set up repository and organization documents. Before indexing any collection content, the ES index must contain 'repository' and 'organization' metadata. The 'repository' data is basic information about the `ddr-public` instance, and the 'organization' json documents describe each individual DDR partner. Partner content cannot be indexed until the the corresponding 'organization' json document is indexed. You need to manually add every organization you want to appear on the ddr (one, pc, janm, testing, etc...) The 'organization' files can be found in the organizations' inventory repositories; the master 'repository' json is in the 'ddr' repo::
     
-    $ ddrindex postjson -H http://ESHOST_IP:9200 -i ddrpublic-production repository ddr /PATH/TO/ddr/repository.json
-    $ ddrindex postjson -H http://ESHOST_IP:9200 -i ddrpublic-production organization REPO-ORG /PATH/TO/REPO-ORG/organization.json
+    $ ddrindex postjson -H -i ddrpublic-production repository ddr /PATH/TO/ddr/repository.json
+    $ ddrindex postjson -H -i ddrpublic-production organization REPO-ORG /PATH/TO/REPO-ORG/organization.json
+
+get vocabularies (if at DenshoHQ
+    $ git clone https://github.com/densho/ddr-vocab.git /home/ddr/ddr-vocab
+
+For additional index related commands use:
+    $ ddrindex help
 
 The ES cluster is now ready to accept DDR collection data. 
 
